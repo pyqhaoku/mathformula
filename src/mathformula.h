@@ -1,13 +1,25 @@
 #ifndef __MATHFORMULA_H_
 #define __MATHFORMULA_H_
 
+#define OL_MAX_SIZE 255
+#define DELIMITER '#'
+
+typedef struct operatorList{
+	int id;
+	char *string;
+	int level;
+	int number;
+	int type;       // type 1 +-*/ a string b   // type 2 log(a,b)...
+	double (*mfCalc_func)(int num,...);
+}operatorList;
+
 /* ----------------------------------------------------------------------------*/
 /**
  * @brief 计算公式中的运算符号栈
  */
 /* ----------------------------------------------------------------------------*/
 typedef struct operatorchar{
-	char *opchar;     ///计算公式中的运算符号栈空间
+	char *opchar;     ///计算公式中的运算符号栈空间  opchar == ol->id
 	int ocsize;       /// 栈申请的空间
 	int top;         /// 栈指针
 }operatorchar;
@@ -26,6 +38,6 @@ typedef struct formuladata{
 
 //typedef struct 
 
-extern mfDescToValue_func *mfDescToValue;
+//extern mfDescToValue_func *mfDescToValue;
 
 #endif
