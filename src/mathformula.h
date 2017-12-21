@@ -10,7 +10,7 @@ typedef struct operatorList{
 	int level;
 	int number;
 	int type;       // type 1 +-*/ a string b   // type 2 log(a,b)...
-	double (*mfCalc_func)(int num,...);
+	int (*mfCalc_func)(int num, double data[], double *result);
 }operatorList;
 
 /* ----------------------------------------------------------------------------*/
