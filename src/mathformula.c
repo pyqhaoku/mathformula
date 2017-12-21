@@ -23,10 +23,9 @@
 //
 operatorList ol[OL_MAX_SIZE];
 
-typedef int mfDescToValue_func(char *desc, double *data);
-typedef int mfCalc_func(int num, double data[], double *result);
-
-mfDescToValue_func *mfDescToValue = (mfDescToValue_func *)NULL;
+extern mfDescToValue_func *mfDescToValue = (mfDescToValue_func *)NULL;
+//mfDescToValue = (mfDescToValue_func *)NULL;
+static int initflag = 0;
 
 int operatorListAdd(char *string, int level, int number, int type, int (*mfCalc_func)(int num,double data[], double *result))
 {
@@ -368,50 +367,6 @@ char *analysis(char *str, int strsize)
 	return restr;
 }
 
-int readPChar(char str[], int sindex, int strsize)
-{
-	while(sindex < strsize && str[sindex] == ' ') sindex++;
-	int eindex = sindex + 1;
-	
-}
-
-int readFData(char str[], int sindex, int strsize)
-{
-	// number  or string
-	while(sindex < strsize && str[sindex] == ' ') sindex++;
-	int eindex = sindex + 1;
-
-	// parentheses number
-	int pflag = 0;
-	while(eindex < strsize)
-	{
-		if(str[eindex] == '(')
-		{
-			pflag++;
-		}
-		else if(pflag > 0)
-		{
-			if(str[eindex] == ')')
-			{
-				pflag--;
-			}
-		}
-		else
-		{
-			// change on feather
-			if(str[eindex] == '+' || str[eindex] == '-' ||
-					str[eindex] == '*' || str[eindex] == '/' ||
-					str[eindex] == '^')
-			{
-				break;
-			}
-		}
-		eindex++;
-	}
-
-	return eindex;
-}
-
 int mfClacStack(operatorchar *pchar, formuladata *fdata, int level)
 {
 	do{
@@ -626,42 +581,29 @@ int mfDiv(int num, double data[], double *result)
 	return 0;
 }
 
-int mfDescToValue2(char *desc, double *data)
+int mathformulaInit()
 {
-	*data = 0;
-	int i = 0;
-	int len = strlen(desc);
-	for( i = 0 ; i < len ; i++)
-	{
-		*data += desc[i];
-	}
+	initflag = 1;
 
-	*data /= len;
-	return 0;
-}
-
-/// check function 
-int main()
-{
 	operatorListAdd("(", 0, 0, 0, NULL);
 	operatorListAdd("+", 1, 2, 1, mfSum);
 	operatorListAdd("-", 1, 2, 1, mfSub);
 	operatorListAdd("*", 2, 2, 1, mfMul);
 	operatorListAdd("/", 2, 2, 1, mfDiv);
 
-	mfDescToValue = mfDescToValue2;
-
-	//char test[] = "abc(1+2)+log(2+3)";
-	char test[256];
-	while(~scanf("%s", test))
+	return 0;
+}
+/// check function 
+int mathformula(char *str, double *result)
+{
+	if(initflag == 0)
 	{
-		char *p = analysis(test, strlen(test));
-		printf("test=|%s|\n", p);
-		double result = 0;
-		mfTransformation(p, strlen(p), &result);
-		free(p);
-		printf("result = %lf\n", result);
+		mathformulaInit();
 	}
+
+	char *p = analysis(str, strlen(str));
+	mfTransformation(p, strlen(p), result);
+	free(p);
 
 	return 0;
 }

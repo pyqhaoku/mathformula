@@ -4,6 +4,9 @@
 #define OL_MAX_SIZE 255
 #define DELIMITER '#'
 
+typedef int mfDescToValue_func(char *desc, double *data);
+typedef int mfCalc_func(int num, double data[], double *result);
+
 typedef struct operatorList{
 	int id;
 	char *string;
@@ -38,6 +41,10 @@ typedef struct formuladata{
 
 //typedef struct 
 
-//extern mfDescToValue_func *mfDescToValue;
+extern mfDescToValue_func *mfDescToValue;
+
+// function
+int operatorListAdd(char *string, int level, int number, int type, int (*mfCalc_func)(int num,double data[], double *result));
+int mathformula(char *str, double *result);
 
 #endif

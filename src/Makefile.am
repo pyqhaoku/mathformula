@@ -2,6 +2,5 @@ INCLUDES =
 LIBS = 
 COMMON_LIB = 
 
-bin_PROGRAMS = mathformula
-mathformula_SOURCES = mathformula.c pstring.c 
-mathformula_LDADD = -lm
+noinst_LIBRARIES = libmathformula.a
+libmathformula_a_SOURCES = mathformula.c pstring.c

@@ -34,7 +34,8 @@ POST_UNINSTALL = :
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure depcomp install-sh missing
+	$(top_srcdir)/configure config.guess config.sub depcomp \
+	install-sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -125,7 +126,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lm 
+LIBS = 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/omc/src-develop/mathformula/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -137,6 +138,7 @@ PACKAGE_STRING = mathformula 1.0.0
 PACKAGE_TARNAME = mathformula
 PACKAGE_VERSION = 1.0.0
 PATH_SEPARATOR = :
+RANLIB = ranlib
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = 

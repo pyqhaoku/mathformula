@@ -12,8 +12,10 @@ AM_INIT_AUTOMAKE([mathformula], [1.0.0])
 AC_PROG_CC
 
 # Checks for libraries.
+AC_PROG_RANLIB
+
 # FIXME: Replace `main' with a function in `-lm':
-AC_CHECK_LIB([m], [main])
+#AC_CHECK_LIB([m], [main])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h])
