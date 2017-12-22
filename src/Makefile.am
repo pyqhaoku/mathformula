@@ -2,5 +2,6 @@ INCLUDES =
 LIBS = 
 COMMON_LIB = 
 
-noinst_LIBRARIES = libmathformula.a
-libmathformula_a_SOURCES = mathformula.c pstring.c
+lib_LTLIBRARIES = libmathformula.la
+libmathformula_la_SOURCES = mathformula.c pstring.c
+libmathformula_la_LDFLAGS = -version-info $(VERSION_INFO) 

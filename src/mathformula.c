@@ -23,7 +23,7 @@
 //
 operatorList ol[OL_MAX_SIZE];
 
-extern mfDescToValue_func *mfDescToValue = (mfDescToValue_func *)NULL;
+mfDescToValue_func *mfDescToValue = (mfDescToValue_func *)NULL;
 //mfDescToValue = (mfDescToValue_func *)NULL;
 static int initflag = 0;
 
@@ -247,6 +247,21 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 		if( flag && restr[s] == ' ')
 		{
 			restr[s] = DELIMITER;
+		}
+		else if(restr[s] == '+' || restr[s] == '-')
+		{
+			if(s == 1)
+			{
+				restr[s-1] = ' ';
+				restr[s+1] = ' ';
+				s += 1;
+			}
+			else if(s > 1 && restr[s-2] == DELIMITER)
+			{
+				restr[s-1] = ' ';
+				restr[s+1] = ' ';
+				s += 1;
+			}
 		}
 		else if(restr[s] == ')')
 		{
@@ -550,21 +565,21 @@ EXIT_ERR:
 int mfSum(int num, double data[], double *result)
 {
 	*result = data[0] + data[1];
-	printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
 	return 0;
 }
 
 int mfSub(int num, double data[], double *result)
 {
 	*result = data[1] - data[0];
-	printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
 	return 0;
 }
 
 int mfMul(int num, double data[], double *result)
 {
 	*result = data[1] * data[0];
-	printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
 	return 0;
 }
 
@@ -577,7 +592,7 @@ int mfDiv(int num, double data[], double *result)
 	}
 
 	*result = data[1] / data[0];
-	printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
 	return 0;
 }
 
@@ -602,8 +617,8 @@ int mathformula(char *str, double *result)
 	}
 
 	char *p = analysis(str, strlen(str));
-	mfTransformation(p, strlen(p), result);
+	int rc = mfTransformation(p, strlen(p), result);
 	free(p);
 
-	return 0;
+	return rc;
 }

@@ -1,6 +1,9 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#define HAVE_DLFCN_H 1
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
@@ -45,29 +48,42 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* Major version */
+#define LIBMATHFORMULA_MAJOR_VERSION 1
+
+/* Micro version */
+#define LIBMATHFORMULA_MICRO_VERSION 1
+
+/* Minor version */
+#define LIBMATHFORMULA_MINOR_VERSION 0
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#define LT_OBJDIR ".libs/"
+
 /* Name of package */
-#define PACKAGE "mathformula"
+#define PACKAGE "libmathformula"
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT "pyqhaoku@163.com"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "mathformula"
+#define PACKAGE_NAME "libmathformula"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mathformula 1.0.0"
+#define PACKAGE_STRING "libmathformula 1.0.1"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "mathformula"
+#define PACKAGE_TARNAME "libmathformula"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.0.0"
+#define PACKAGE_VERSION "1.0.1"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 /* Define to rpl_malloc if the replacement function should be used. */
 /* #undef malloc */

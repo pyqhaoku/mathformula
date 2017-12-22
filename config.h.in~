@@ -47,15 +47,6 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Major version */
-#undef LIBMATHFORMULA_MAJOR_VERSION
-
-/* Micro version */
-#undef LIBMATHFORMULA_MICRO_VERSION
-
-/* Minor version */
-#undef LIBMATHFORMULA_MINOR_VERSION
-
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
