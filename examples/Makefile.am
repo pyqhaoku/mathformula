@@ -1,5 +1,5 @@
 INCLUDES = -I../include
-LIBS = -L../lib
+LIBS =
 COMMON_LIB = 
 
 bin_PROGRAMS = test
