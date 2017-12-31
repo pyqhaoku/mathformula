@@ -27,8 +27,41 @@ mfDescToValue_func *mfDescToValue = (mfDescToValue_func *)NULL;
 //mfDescToValue = (mfDescToValue_func *)NULL;
 static int initflag = 0;
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 添加一个运算符
+ *
+ * @param string
+ * @param level
+ * @param number
+ * @param type
+ * @param mfCalc_func
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int operatorListAdd(char *string, int level, int number, int type, int (*mfCalc_func)(int num,double data[], double *result))
 {
+	if(initflag == 0)
+	{
+		mathformulaInit();
+	}
+
+	if(level < LEVEL_ZERO || level > LEVEL_TEN)
+	{
+		return -1;
+	}
+
+	if(type != MATH_TYPE_A || type != MATH_TYPE_B || type != MATH_TYPE_Z)
+	{
+		return -1;
+	}
+
+	if(type == MATH_TYPE_A && number != 2)
+	{
+		return -1;
+	}
+
 	int index = 0;
 	for(index = 0; index < OL_MAX_SIZE; index++)
 	{
@@ -48,6 +81,16 @@ int operatorListAdd(char *string, int level, int number, int type, int (*mfCalc_
 	return index;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 运算符入栈 内部函数
+ *
+ * @param pchar
+ * @param ch
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int operatorcharPop(operatorchar *pchar, char ch)
 {
 	// malloc
@@ -62,6 +105,15 @@ int operatorcharPop(operatorchar *pchar, char ch)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 运算符出栈 内部函数
+ *
+ * @param pchar
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int operatorcharPush(operatorchar *pchar)
 {
 	if(pchar->top < 0)
@@ -72,6 +124,15 @@ int operatorcharPush(operatorchar *pchar)
 	return pchar->opchar[pchar->top--];
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 判断运算符栈是否为空栈
+ *
+ * @param pchar
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int operatorcharIsEmpty(operatorchar *pchar)
 {
 	if(pchar->top < 0)
@@ -82,6 +143,15 @@ int operatorcharIsEmpty(operatorchar *pchar)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 运算符栈初始化
+ *
+ * @param pchar
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int operatorcharInit(operatorchar *pchar)
 {
 	memset(pchar, 0, sizeof(operatorchar));
@@ -93,12 +163,31 @@ int operatorcharInit(operatorchar *pchar)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 运算符栈内存释放
+ *
+ * @param pchar
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int operatorcharFree(operatorchar *pchar)
 {
 	free(pchar->opchar);
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算数字入栈 内部函数
+ *
+ * @param fdata
+ * @param desc
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int formuladataPop(formuladata *fdata, char *desc)
 {
 	if(fdata->top == fdata->fdsize - 1)
@@ -137,6 +226,16 @@ int formuladataPop(formuladata *fdata, char *desc)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算数字入栈 内部函数
+ *
+ * @param fdata
+ * @param number
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int formuladataPopNumber(formuladata *fdata, double number)
 {
 	if(fdata->top == fdata->fdsize - 1)
@@ -153,6 +252,15 @@ int formuladataPopNumber(formuladata *fdata, double number)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算数字出栈 内部函数
+ *
+ * @param fdata
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 double formuladataPush(formuladata *fdata)
 {
 	if(fdata->top >= 0)
@@ -171,6 +279,15 @@ double formuladataPush(formuladata *fdata)
 	}
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算数字栈是否为空
+ *
+ * @param fdata
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int formuladataIsEmpty(formuladata *fdata)
 {
 	if(fdata->top < 0)
@@ -181,6 +298,15 @@ int formuladataIsEmpty(formuladata *fdata)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 将计算数字栈中的特殊符号转化为数字 --弃用
+ *
+ * @param fdata
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int formuladataDispel(formuladata *fdata)
 {
 	return 0;
@@ -194,6 +320,15 @@ int formuladataDispel(formuladata *fdata)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算数字栈初始化  内部函数
+ *
+ * @param fdata
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int formuladataInit(formuladata *fdata)
 {
 	memset(fdata, 0, sizeof(formuladata));
@@ -206,6 +341,15 @@ int formuladataInit(formuladata *fdata)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算数字栈内存释放
+ *
+ * @param fdata
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int formuladataFree(formuladata *fdata)
 {
 	free(fdata->formulaString);
@@ -236,7 +380,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 	{
 		flag = 1;
 	}
-	else if(restr[start-2] == DELIMITER)
+	else if(restr[start-2] == MATH_DELIMCHAR)
 	{
 		flag = 1;
 	}
@@ -246,7 +390,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 	{
 		if( flag && restr[s] == ' ')
 		{
-			restr[s] = DELIMITER;
+			restr[s] = MATH_DELIMCHAR;
 		}
 		else if(restr[s] == '+' || restr[s] == '-')
 		{
@@ -256,7 +400,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 				restr[s+1] = ' ';
 				s += 1;
 			}
-			else if(s > 1 && restr[s-2] == DELIMITER)
+			else if(s > 1 && restr[s-2] == MATH_DELIMCHAR)
 			{
 				restr[s-1] = ' ';
 				restr[s+1] = ' ';
@@ -267,7 +411,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 		{
 			if(flag)
 			{
-				restr[s+1] = DELIMITER;
+				restr[s+1] = MATH_DELIMCHAR;
 			}
 
 			if(start == 0)
@@ -281,7 +425,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 		}
 		else if(restr[s] == '(')
 		{
-			if(s > 1 && restr[s-2] != DELIMITER)
+			if(s > 1 && restr[s-2] != MATH_DELIMCHAR)
 			{
 				restr[s-1] = ' ';
 			}
@@ -305,6 +449,18 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算公式识别
+ * @note 将运算符号和数字用分隔符分开 方便计算处理
+ * 不识别的符号会当做数字处理  如果外部提供的函数无法处理 则计算失败
+ *
+ * @param str
+ * @param strsize
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 char *analysis(char *str, int strsize)
 {
 	char *restr = malloc(strsize * 3);
@@ -357,7 +513,7 @@ char *analysis(char *str, int strsize)
 		snprintf(temp, len + 3, " %s(", ol[index].string);
 
 		char *temp2 = malloc(len + 7);
-		snprintf(temp2, len + 7, " #%s##(#", ol[index].string);
+		snprintf(temp2, len + 7, " %c%s%c%c(%c", MATH_DELIMCHAR, ol[index].string, MATH_DELIMCHAR, MATH_DELIMCHAR, MATH_DELIMCHAR);
 		
 		replace(restr, strsize * 3, temp, temp2);
 
@@ -382,6 +538,17 @@ char *analysis(char *str, int strsize)
 	return restr;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 对栈中的内容进行一次计算
+ *
+ * @param pchar
+ * @param fdata
+ * @param level
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mfClacStack(operatorchar *pchar, formuladata *fdata, int level)
 {
 	do{
@@ -446,6 +613,17 @@ int mfClacStack(operatorchar *pchar, formuladata *fdata, int level)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算识别后的计算公式的计算结果
+ *
+ * @param str[]
+ * @param strsize
+ * @param result
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mfTransformation(char str[], int strsize, double *result)
 {
 	int index = 0;
@@ -459,11 +637,11 @@ int mfTransformation(char str[], int strsize, double *result)
 
 	while(index < strsize)
 	{
-		if(str[index] == '#')
+		if(str[index] == MATH_DELIMCHAR)
 		{
 			// operatorchar
 			int len = 0;
-			char *s = strtagcpy(str + index + 1, "#", &len);
+			char *s = strtagcpy(str + index + 1, MATH_DELIMITER, &len);
 			// skip "#s#"
 			index += len + 2;
 			if(strcmp(s, "(") == 0)
@@ -529,7 +707,7 @@ int mfTransformation(char str[], int strsize, double *result)
 		{
 			// data
 			int len = 0;
-			char *numstr = strtagcpy(str + index, "#", &len);
+			char *numstr = strtagcpy(str + index, MATH_DELIMITER, &len);
 			index += len;
 
 			rc = formuladataPop(&fdata, numstr);
@@ -562,6 +740,17 @@ EXIT_ERR:
 	return -1;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 加法实现 +
+ *
+ * @param num
+ * @param data[]
+ * @param result
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mfSum(int num, double data[], double *result)
 {
 	*result = data[0] + data[1];
@@ -569,6 +758,17 @@ int mfSum(int num, double data[], double *result)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 减法实现 -
+ *
+ * @param num
+ * @param data[]
+ * @param result
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mfSub(int num, double data[], double *result)
 {
 	*result = data[1] - data[0];
@@ -576,6 +776,17 @@ int mfSub(int num, double data[], double *result)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 乘法实现 *
+ *
+ * @param num
+ * @param data[]
+ * @param result
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mfMul(int num, double data[], double *result)
 {
 	*result = data[1] * data[0];
@@ -583,6 +794,17 @@ int mfMul(int num, double data[], double *result)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 除法实现 /
+ *
+ * @param num
+ * @param data[]
+ * @param result
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mfDiv(int num, double data[], double *result)
 {
 	if(data[0] == 0)
@@ -596,19 +818,36 @@ int mfDiv(int num, double data[], double *result)
 	return 0;
 }
 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 初始化 添加默认实现的运算符号
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mathformulaInit()
 {
 	initflag = 1;
 
-	operatorListAdd("(", 0, 0, 0, NULL);
-	operatorListAdd("+", 1, 2, 1, mfSum);
-	operatorListAdd("-", 1, 2, 1, mfSub);
-	operatorListAdd("*", 2, 2, 1, mfMul);
-	operatorListAdd("/", 2, 2, 1, mfDiv);
+	operatorListAdd("(", LEVEL_ZERO, 0, MATH_TYPE_Z, NULL);
+	operatorListAdd("+", LEVEL_TWO, 2, MATH_TYPE_A, mfSum);
+	operatorListAdd("-", LEVEL_TWO, 2, MATH_TYPE_A, mfSub);
+	operatorListAdd("*", LEVEL_THREE, 2, MATH_TYPE_A, mfMul);
+	operatorListAdd("/", LEVEL_THREE, 2, MATH_TYPE_A, mfDiv);
 
 	return 0;
 }
 /// check function 
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief 计算计算公式的结果 外部调用函数
+ *
+ * @param str
+ * @param result
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
 int mathformula(char *str, double *result)
 {
 	if(initflag == 0)

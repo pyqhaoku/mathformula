@@ -2,7 +2,26 @@
 #define __MATHFORMULA_H_
 
 #define OL_MAX_SIZE 255
-#define DELIMITER '#'
+#define MATH_DELIMITER "#"
+#define MATH_DELIMCHAR '#'
+
+#define MATH_TYPE_A 1      // type a (operator) b  example +-*/ 
+#define MATH_TYPE_B 2      // type operator(a,b)   example sum(a,b)
+#define MATH_TYPE_Z 0      // (
+
+typedef enum{
+	LEVEL_ZERO,
+	LEVEL_ONE,
+	LEVEL_TWO,
+	LEVEL_THREE,
+	LEVEL_FOUR,
+	LEVEL_FIVE,
+	LEVEL_SIX,
+	LEVEL_SEVEN,
+	LEVEL_EIGHT,
+	LEVEL_NINE,
+	LEVEL_TEN
+}MATH_LEVEL;
 
 typedef int mfDescToValue_func(char *desc, double *data);
 typedef int mfCalc_func(int num, double data[], double *result);
