@@ -21,7 +21,7 @@
 //operatorchar opchar;
 //formuladata  fodata;
 //
-operatorList ol[OL_MAX_SIZE];
+static operatorList ol[OL_MAX_SIZE];
 
 mfDescToValue_func *mfDescToValue = (mfDescToValue_func *)NULL;
 //mfDescToValue = (mfDescToValue_func *)NULL;
@@ -52,7 +52,7 @@ int operatorListAdd(char *string, int level, int number, int type, int (*mfCalc_
 		return -1;
 	}
 
-	if(type != MATH_TYPE_A || type != MATH_TYPE_B || type != MATH_TYPE_Z)
+	if(type != MATH_TYPE_A && type != MATH_TYPE_B && type != MATH_TYPE_Z)
 	{
 		return -1;
 	}
@@ -213,14 +213,18 @@ int formuladataPop(formuladata *fdata, char *desc)
 	}
 	else
 	{
-		double number = atof(desc);
-		if(number == 0 && strncmp(desc, "0", 1) != 0)
+		char *p = NULL;
+		double number = strtof(desc, &p);
+		if( p - desc - strlen(desc) == 0)
+		{
+			fdata->formulaNumber[fdata->top] = number;
+		}
+		//if(number == 0 && strncmp(desc, "0", 1) != 0)
+		else
 		{
 			fprintf(stderr, "%s not number\n", desc);
 			return -1;
 		}
-
-		fdata->formulaNumber[fdata->top] = number;
 	}
 
 	return 0;
@@ -477,7 +481,7 @@ char *analysis(char *str, int strsize)
 			break;
 		}
 
-		if(ol[index].type == 2)
+		if(ol[index].type == MATH_TYPE_B)
 		{
 			// skip
 			continue;
@@ -501,7 +505,7 @@ char *analysis(char *str, int strsize)
 			break;
 		}
 
-		if(ol[index].type != 2)
+		if(ol[index].type != MATH_TYPE_B)
 		{
 			// skip
 			continue;
