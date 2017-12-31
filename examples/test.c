@@ -53,8 +53,8 @@ int lessEqual(int num, double data[], double *result)
 
 int main()
 {
-	operatorListAdd(">=", LEVEL_TEN, 2, MATH_TYPE_A, greatEqual);
-	operatorListAdd("<=", LEVEL_TEN, 2, MATH_TYPE_A, lessEqual);
+	//operatorListAdd(">=", LEVEL_TEN, 2, MATH_TYPE_A, greatEqual);
+	//operatorListAdd("<=", LEVEL_TEN, 2, MATH_TYPE_A, lessEqual);
 	mfDescToValue = testf;
 	char test[256];
 	double result;

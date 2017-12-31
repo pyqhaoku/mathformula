@@ -822,6 +822,71 @@ int mfDiv(int num, double data[], double *result)
 	return 0;
 }
 
+int mfGreaterEqual(int num, double data[], double *result)
+{
+	if(data[1] >= data[0])
+	{
+		*result = 1;
+	}
+	else{
+		*result = 0;
+	}
+
+	return 0;
+}
+
+int mfGreater(int num, double data[], double *result)
+{
+	if(data[1] > data[0])
+	{
+		*result = 1;
+	}
+	else{
+		*result = 0;
+	}
+
+	return 0;
+}
+
+int mfLessEqual(int num, double data[], double *result)
+{
+	if(data[1] <= data[0])
+	{
+		*result = 1;
+	}
+	else{
+		*result = 0;
+	}
+
+	return 0;
+}
+
+int mfLess(int num, double data[], double *result)
+{
+	if(data[1] < data[0])
+	{
+		*result = 1;
+	}
+	else{
+		*result = 0;
+	}
+
+	return 0;
+}
+
+int mfEqual(int num, double data[], double *result)
+{
+	if(data[1] == data[0])
+	{
+		*result = 1;
+	}
+	else{
+		*result = 0;
+	}
+
+	return 0;
+}
+
 /* ----------------------------------------------------------------------------*/
 /**
  * @brief 初始化 添加默认实现的运算符号
@@ -834,6 +899,12 @@ int mathformulaInit()
 	initflag = 1;
 
 	operatorListAdd("(", LEVEL_ZERO, 0, MATH_TYPE_Z, NULL);
+	operatorListAdd("==", LEVEL_ONE, 2, MATH_TYPE_A, mfEqual);
+	operatorListAdd(">=", LEVEL_ONE, 2, MATH_TYPE_A, mfGreaterEqual);
+	operatorListAdd(">", LEVEL_ONE, 2, MATH_TYPE_A, mfGreater);
+	operatorListAdd("<=", LEVEL_ONE, 2, MATH_TYPE_A, mfLessEqual);
+	operatorListAdd("<", LEVEL_ONE, 2, MATH_TYPE_A, mfLess);
+
 	operatorListAdd("+", LEVEL_TWO, 2, MATH_TYPE_A, mfSum);
 	operatorListAdd("-", LEVEL_TWO, 2, MATH_TYPE_A, mfSub);
 	operatorListAdd("*", LEVEL_THREE, 2, MATH_TYPE_A, mfMul);
