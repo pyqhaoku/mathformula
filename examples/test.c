@@ -48,6 +48,7 @@ int mfIf(int num , double data[], double *result)
 		*result = 1;
 	}
 
+	printf("mfIf:data[0] = %lf\n", data[0]);
 	return 0;
 }
 

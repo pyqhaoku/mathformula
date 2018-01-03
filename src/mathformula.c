@@ -432,8 +432,9 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 				restr[s+1] = ' ';
 				s += 1;
 			}
-			else if(s > 1 && (restr[s-2] == MATH_DELIMCHAR || restr[s-2] == ' '))
+			else if(s > 2 && (restr[s-2] == MATH_DELIMCHAR || restr[s-2] == ' ') && restr[s-3] != ')')
 			{
+				// +/- 前面如果是运算符 则自身作正负号 如果不是 或者是右括号 则作加减号处理
 				restr[s-1] = ' ';
 				restr[s+1] = ' ';
 				s += 1;
@@ -568,10 +569,11 @@ char *analysis(char *str, int strsize)
 		olnum++;
 		int len = strlen(ol[index].string);
 		char *temp = malloc(len + 5);
-		snprintf(temp, len + 5, " %s ( ", ol[index].string);
+		snprintf(temp, len + 5, " %s (", ol[index].string);
 
 		char *temp2 = malloc(len + 7);
-		snprintf(temp2, len + 7, " %c%s%c%c(%c", MATH_DELIMCHAR, ol[index].string, MATH_DELIMCHAR, MATH_DELIMCHAR, MATH_DELIMCHAR);
+		//snprintf(temp2, len + 7, " %c%s%c%c(%c", MATH_DELIMCHAR, ol[index].string, MATH_DELIMCHAR, MATH_DELIMCHAR, MATH_DELIMCHAR);
+		snprintf(temp2, len + 7, "  %s  (", ol[index].string);
 		
 		replace(restr, strsize * 3, temp, temp2);
 
@@ -1004,6 +1006,7 @@ int mathformulaInit()
 	initflag = 1;
 
 	operatorListAdd("(", LEVEL_ZERO, 0, MATH_TYPE_Z, NULL);
+	operatorListAdd(",", LEVEL_ZERO, 0, MATH_TYPE_Z, NULL);
 	operatorListAdd("==", LEVEL_ONE, 2, MATH_TYPE_A, mfEqual);
 	operatorListAdd(">", LEVEL_ONE, 2, MATH_TYPE_A, mfGreater);
 	operatorListAdd(">=", LEVEL_ONE, 2, MATH_TYPE_A, mfGreaterEqual);
