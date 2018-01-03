@@ -24,20 +24,6 @@ int testf(char *desc, double *re)
 	return 0;
 }
 
-// >=
-int greatEqual(int num, double data[], double *result)
-{
-	if(data[1] >= data[0])
-	{
-		*result = 1;
-	}
-	else{
-		*result = 0;
-	}
-
-	return 0;
-}
-
 int lessEqual(int num, double data[], double *result)
 {
 	if(data[1] <= data[0])
@@ -51,10 +37,26 @@ int lessEqual(int num, double data[], double *result)
 	return 0;
 }
 
+int mfIf(int num , double data[], double *result)
+{
+	if(data[0] == 0)
+	{
+		*result = 0;
+	}
+	else
+	{
+		*result = 1;
+	}
+
+	return 0;
+}
+
 int main()
 {
 	//operatorListAdd(">=", LEVEL_TEN, 2, MATH_TYPE_A, greatEqual);
 	//operatorListAdd("<=", LEVEL_TEN, 2, MATH_TYPE_A, lessEqual);
+	int rc = operatorListAdd("IF", LEVEL_TEN, 1, MATH_TYPE_B, mfIf);
+	//printf("rc = %d\n", rc);
 	mfDescToValue = testf;
 	char test[256];
 	double result;

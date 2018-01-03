@@ -18,6 +18,17 @@
 #define strdup(a) strcpy_p(a)
 #endif
 
+#define __MF_DEBUG_MODE_
+
+#define DEBUGARGS __FILE__,__LINE__,__FUNCTION__
+#define DEBUGFMT  "[mathformula]%s(%d)-%s:"
+
+#define _WriteLog(fmt,...) \
+	do\
+	{\
+		printf(DEBUGFMT fmt, DEBUGARGS, ##__VA_ARGS__);\
+	}while(0);
+
 //operatorchar opchar;
 //formuladata  fodata;
 //
@@ -49,16 +60,25 @@ int operatorListAdd(char *string, int level, int number, int type, int (*mfCalc_
 
 	if(level < LEVEL_ZERO || level > LEVEL_TEN)
 	{
+		fprintf(stderr, "invalid level %d\n", level);
 		return -1;
 	}
 
 	if(type != MATH_TYPE_A && type != MATH_TYPE_B && type != MATH_TYPE_Z)
 	{
+		fprintf(stderr, "invalid type %d\n", type);
 		return -1;
 	}
 
 	if(type == MATH_TYPE_A && number != 2)
 	{
+		fprintf(stderr, "TYPE_A number must be two\n");
+		return -1;
+	}
+
+	if(type == MATH_TYPE_B && level <= 3)
+	{
+		fprintf(stderr, "TYPE_B level must greater than 3\n");
 		return -1;
 	}
 
@@ -199,7 +219,7 @@ int formuladataPop(formuladata *fdata, char *desc)
 
 	fdata->top ++;
 	fdata->formulaString[fdata->top] = strcpy_p(desc);
-	if(mfDescToValue != NULL && isdigit(desc[0]) == 0)
+	if(mfDescToValue != NULL && (isdigit(desc[0]) == 0 && desc[0] != '+' && desc[0] != '-'))
 	{
 		double number;
 		int rc = mfDescToValue(desc, &number);
@@ -210,6 +230,9 @@ int formuladataPop(formuladata *fdata, char *desc)
 		}
 
 		fdata->formulaNumber[fdata->top] = number;
+#ifdef __MF_DEBUG_MODE_
+		_WriteLog("desc=|%s| number=%lf\n", desc, number);
+#endif
 	}
 	else
 	{
@@ -225,6 +248,9 @@ int formuladataPop(formuladata *fdata, char *desc)
 			fprintf(stderr, "%s not number\n", desc);
 			return -1;
 		}
+#ifdef __MF_DEBUG_MODE_
+		_WriteLog("desc=|%s| number=%lf\n", desc, number);
+#endif
 	}
 
 	return 0;
@@ -377,7 +403,9 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 	int len = strlen(restr);
 	if(start >= len - 1 || start >= rsize - 1) return 0;
 
-	//printf("debug:start=%d,restr[]=%c\n", start, restr[start]);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("debug:start=%d,restr[]=%c\n", start, restr[start]);
+#endif
 	// set ' ' to '#'
 	int flag = 0;
 	if(start == 0)
@@ -404,7 +432,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 				restr[s+1] = ' ';
 				s += 1;
 			}
-			else if(s > 1 && restr[s-2] == MATH_DELIMCHAR)
+			else if(s > 1 && (restr[s-2] == MATH_DELIMCHAR || restr[s-2] == ' '))
 			{
 				restr[s-1] = ' ';
 				restr[s+1] = ' ';
@@ -490,13 +518,39 @@ char *analysis(char *str, int strsize)
 		olnum++;
 		int len = strlen(ol[index].string);
 		char *temp = malloc(len + 3);
+		char *temp2 = malloc(len + 3);
 		snprintf(temp, len + 3, " %s ", ol[index].string);
-		replace(restr, strsize * 3, ol[index].string, temp);
+
+		if(len >= 2 )
+		{
+			if(strcmp(ol[index].string, ">=") == 0)
+			{
+				snprintf(temp2, len + 3, " > =");
+			}
+			else if(strcmp(ol[index].string, "<=") == 0)
+			{
+				snprintf(temp2, len+3, " < =");
+			}
+			else
+			{
+				snprintf(temp2, len+3, "%s", ol[index].string);
+			}
+
+		}
+		else
+		{
+			snprintf(temp2, len+3, "%s", ol[index].string);
+		}
+
+		replace(restr, strsize * 3, temp2, temp);
 
 		free(temp);
+		free(temp2);
 	}
 
-	//printf("debug:restr=|%s|\n", restr);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("TYPE_A:restr=|%s|\n", restr);
+#endif
 
 	for(index = 0; index < OL_MAX_SIZE; index++)
 	{
@@ -513,8 +567,8 @@ char *analysis(char *str, int strsize)
 
 		olnum++;
 		int len = strlen(ol[index].string);
-		char *temp = malloc(len + 3);
-		snprintf(temp, len + 3, " %s(", ol[index].string);
+		char *temp = malloc(len + 5);
+		snprintf(temp, len + 5, " %s ( ", ol[index].string);
 
 		char *temp2 = malloc(len + 7);
 		snprintf(temp2, len + 7, " %c%s%c%c(%c", MATH_DELIMCHAR, ol[index].string, MATH_DELIMCHAR, MATH_DELIMCHAR, MATH_DELIMCHAR);
@@ -523,17 +577,25 @@ char *analysis(char *str, int strsize)
 
 	}
 
-	//printf("debug:restr=|%s|\n", restr);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("TYPE_B:restr=|%s|\n", restr);
+#endif
 	replace(restr, strsize * 3, ")", " ) ");
 
-	//printf("debug:restr=|%s|\n", restr);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("):restr=|%s|\n", restr);
+#endif
 	// deal ()
 	int rc = analysis_parenthesis(restr, 0, strsize * 3);
 
-	//printf("debug:restr=|%s|\n", restr);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("():restr=|%s|\n", restr);
+#endif
 	// clear space
 	stringRemoveSpace(restr);
-	//printf("debug:restr=|%s|\n", restr);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("space:restr=|%s|\n", restr);
+#endif
 	if(rc < 0)
 	{
 		restr = NULL;
@@ -553,8 +615,28 @@ char *analysis(char *str, int strsize)
  * @return 
  */
 /* ----------------------------------------------------------------------------*/
-int mfClacStack(operatorchar *pchar, formuladata *fdata, int level)
+int mfCalcStack(operatorchar *pchar, formuladata *fdata, int level)
 {
+	// debug
+#ifdef __MF_DEBUG_MODE_
+	if(1)
+	{
+		printf("mfCalcStack: print operatorchar and formuladata\n");
+		int i = 0;
+		for( i = 0; i <= pchar->top; i++)
+		{
+			printf("%s ", ol[pchar->opchar[i]].string);
+		}
+
+		printf("\n");
+		for( i = 0 ; i <= fdata->top ; i++)
+		{
+			printf("%lf ", fdata->formulaNumber[i]);
+		}
+		printf("\n");
+	}
+#endif
+	
 	do{
 		if(operatorcharIsEmpty(pchar) == 1)
 		{
@@ -655,10 +737,10 @@ int mfTransformation(char str[], int strsize, double *result)
 			else if(strcmp(s, ")") == 0)
 			{
 				// ()
-				rc = mfClacStack(&pchar, &fdata, 0);
+				rc = mfCalcStack(&pchar, &fdata, 0);
 				if(rc < 0)
 				{
-					fprintf(stderr, "mfClacStack() failed\n");
+					fprintf(stderr, "mfCalcStack() failed\n");
 					goto EXIT_ERR;
 				}
 
@@ -695,10 +777,10 @@ int mfTransformation(char str[], int strsize, double *result)
 				}
 
 				int olevel = ol[oindex].level;
-				rc = mfClacStack(&pchar, &fdata, olevel);
+				rc = mfCalcStack(&pchar, &fdata, olevel);
 				if(rc < 0)
 				{
-					fprintf(stderr, "mfClacStack() failed\n");
+					fprintf(stderr, "mfCalcStack() failed\n");
 					goto EXIT_ERR;
 				}
 
@@ -724,10 +806,10 @@ int mfTransformation(char str[], int strsize, double *result)
 		}
 	}
 	
-	rc = mfClacStack(&pchar, &fdata, -1);
+	rc = mfCalcStack(&pchar, &fdata, -1);
 	if(rc < 0)
 	{
-		fprintf(stderr, "mfClacStack() failed\n");
+		fprintf(stderr, "mfCalcStack() failed\n");
 		goto EXIT_ERR;
 	}
 
@@ -758,7 +840,9 @@ EXIT_ERR:
 int mfSum(int num, double data[], double *result)
 {
 	*result = data[0] + data[1];
-	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -776,7 +860,9 @@ int mfSum(int num, double data[], double *result)
 int mfSub(int num, double data[], double *result)
 {
 	*result = data[1] - data[0];
-	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -794,7 +880,9 @@ int mfSub(int num, double data[], double *result)
 int mfMul(int num, double data[], double *result)
 {
 	*result = data[1] * data[0];
-	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -818,7 +906,9 @@ int mfDiv(int num, double data[], double *result)
 	}
 
 	*result = data[1] / data[0];
-	//printf("testtag(%s):data[1]=%lf data[0]=%lf\n", __FUNCTION__, data[1], data[0]);
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -832,6 +922,9 @@ int mfGreaterEqual(int num, double data[], double *result)
 		*result = 0;
 	}
 
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -845,6 +938,9 @@ int mfGreater(int num, double data[], double *result)
 		*result = 0;
 	}
 
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -858,6 +954,9 @@ int mfLessEqual(int num, double data[], double *result)
 		*result = 0;
 	}
 
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -871,6 +970,9 @@ int mfLess(int num, double data[], double *result)
 		*result = 0;
 	}
 
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -884,6 +986,9 @@ int mfEqual(int num, double data[], double *result)
 		*result = 0;
 	}
 
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("data[1]=%lf data[0]=%lf\n", data[1], data[0]);
+#endif
 	return 0;
 }
 
@@ -900,10 +1005,10 @@ int mathformulaInit()
 
 	operatorListAdd("(", LEVEL_ZERO, 0, MATH_TYPE_Z, NULL);
 	operatorListAdd("==", LEVEL_ONE, 2, MATH_TYPE_A, mfEqual);
-	operatorListAdd(">=", LEVEL_ONE, 2, MATH_TYPE_A, mfGreaterEqual);
 	operatorListAdd(">", LEVEL_ONE, 2, MATH_TYPE_A, mfGreater);
-	operatorListAdd("<=", LEVEL_ONE, 2, MATH_TYPE_A, mfLessEqual);
+	operatorListAdd(">=", LEVEL_ONE, 2, MATH_TYPE_A, mfGreaterEqual);
 	operatorListAdd("<", LEVEL_ONE, 2, MATH_TYPE_A, mfLess);
+	operatorListAdd("<=", LEVEL_ONE, 2, MATH_TYPE_A, mfLessEqual);
 
 	operatorListAdd("+", LEVEL_TWO, 2, MATH_TYPE_A, mfSum);
 	operatorListAdd("-", LEVEL_TWO, 2, MATH_TYPE_A, mfSub);
@@ -930,7 +1035,17 @@ int mathformula(char *str, double *result)
 		mathformulaInit();
 	}
 
+	if(str == NULL)
+	{
+		fprintf(stderr, "empty parameter\n");
+		return -1;
+	}
+
 	char *p = analysis(str, strlen(str));
+	// debug info
+#ifdef __MF_DEBUG_MODE_
+	_WriteLog("debug:p = |%s|\n", p);
+#endif
 	int rc = mfTransformation(p, strlen(p), result);
 	free(p);
 
