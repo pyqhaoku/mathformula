@@ -408,7 +408,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 #endif
 	// set ' ' to '#'
 	int flag = 0;
-	if(start == 0)
+	if(start == 1)
 	{
 		flag = 1;
 	}
@@ -426,7 +426,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 		}
 		else if(restr[s] == '+' || restr[s] == '-')
 		{
-			if(s == 1)
+			if(s == 2)
 			{
 				restr[s-1] = ' ';
 				restr[s+1] = ' ';
@@ -474,7 +474,7 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 		s++;
 	}
 
-	if(start != 0)
+	if(start != 1)
 	{
 		fprintf(stderr, "analysis_parenthesis(%s) failed\n", restr);
 		return -1;
@@ -497,9 +497,10 @@ int analysis_parenthesis(char *restr, int start, int rsize)
 char *analysis(char *str, int strsize)
 {
 	char *restr = malloc(strsize * 3);
-	strcpy(restr, str);
-
-	stringRemoveSpace(restr);
+	//strcpy(restr, str);
+	// 保留起始空格 测试
+	snprintf(restr, strsize * 3, " %s", str);
+	stringRemoveSpace(restr + 1);
 
 	int index = 0, olnum = 0;
 	// type 1
@@ -588,7 +589,7 @@ char *analysis(char *str, int strsize)
 	_WriteLog("):restr=|%s|\n", restr);
 #endif
 	// deal ()
-	int rc = analysis_parenthesis(restr, 0, strsize * 3);
+	int rc = analysis_parenthesis(restr, 1, strsize * 3);
 
 #ifdef __MF_DEBUG_MODE_
 	_WriteLog("():restr=|%s|\n", restr);

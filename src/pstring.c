@@ -486,6 +486,51 @@ int parseNumber(char *number, int *value)
 
 /* ----------------------------------------------------------------------------*/
 /**
+ * @brief 读取字符串中括号内的内容
+ * @note example fa(b(cd))  return b(cd)
+ * 如果括号数量不匹配 返回NULL
+ * 返回的字符串需要手动释放
+ *
+ * @param string
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
+char *parseParenthesis(char *string)
+{
+	int len = strlen(string);
+	int sindex = -1, eindex = -1, eflag = 0, i = 0;
+	for( i = 0; i < len; i++)
+	{
+		if(string[i] == ')')
+		{
+			eflag--;
+			if(eflag < 0)
+			{
+				eindex = i;
+				break;
+			}
+		}
+		else if(string[i] == '(')
+		{
+			eflag++;
+			if(sindex < 0)
+			{
+				sindex = i;
+			}
+		}
+	}
+
+	if(eindex >= 0 && sindex >= 0 && eflag < 0)
+	{
+		return strncpy_p(string + sindex, eindex - sindex);
+	}
+
+	return NULL;
+}
+
+/* ----------------------------------------------------------------------------*/
+/**
  * @brief 检查匹配类型
  *
  * @note %p.%3p-%-4p.%4p.xml  
@@ -789,6 +834,13 @@ char * inttostring(int num)
 {
 	static char numstr[20];
 	snprintf(numstr, sizeof(numstr), "%d", num);
+	return numstr;
+}
+
+char *doubletostring(double num)
+{
+	static char numstr[32];
+	snprintf(numstr, sizeof(numstr), "%lf", num);
 	return numstr;
 }
 

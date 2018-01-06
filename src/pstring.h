@@ -28,6 +28,7 @@ int stringEndOfStr(char *string, char *end);
 
 int charToNumber(char ch);
 int parseNumber(char *number, int *value);
+char *parseParenthesis(char *string);
 int checkPType(char *str, ptype *head);
 int strFormat(char *str, char *fmt, ...)
 	__attribute__((format(printf, 2,3)));
