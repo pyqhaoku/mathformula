@@ -494,7 +494,237 @@ int analysis_parenthesis(char *restr, int start, int rsize)
  * @return 
  */
 /* ----------------------------------------------------------------------------*/
-char *analysis(char *str, int strsize)
+char *analysis(const char *str, int strsize)
+{
+	char *restr = malloc(strsize * 3);
+	char *strbk = strdup(str);
+	memset(restr, 0, strsize * 3);
+
+	stringRemoveSpace(strbk);
+	int i= 0, flag = 0; // flag 0 ParserNumber  1 ParserOther ...
+	int pflag = 0; // 
+	int rl = 0;
+	int eflag = 0;
+
+	if(strbk[0] == '(')
+	{
+		flag = 1;
+	}
+	for(i = 0; i < strsize; i++)
+	{
+		char ch1 = strbk[i];
+
+		if(flag == 0)
+		{
+			// Number of TYPE_B
+			if(isalpha(ch1))
+			{
+				int ei = i + 1;
+				while(isalpha(strbk[ei])) ei++;
+				if(strbk[ei] == '(')
+				{
+					char *funcname = strncpy_p(strbk + i, ei - i);
+					int findex = 0;
+					for(findex = 0; findex < OL_MAX_SIZE; findex++)
+					{
+						if(ol[findex].string == NULL) break;
+						if(ol[findex].type != MATH_TYPE_B) continue;
+						if(strcmp(ol[findex].string, funcname) == 0)
+							break;
+					}
+
+					if(findex < OL_MAX_SIZE && ol[findex].type == MATH_TYPE_B)
+					{
+						strcat(restr, MATH_DELIMITER);
+						strcat(restr, funcname);
+						char temp[20];
+						snprintf(temp, sizeof(temp), "%c%c(%c", MATH_DELIMCHAR, MATH_DELIMCHAR, MATH_DELIMCHAR);
+						strcat(restr, temp);
+						rl = strlen(restr);
+ 
+						pflag++;
+						flag = 0;
+						free(funcname);
+						i = ei;
+
+#ifdef __MF_DEBUG_MODE_
+						printf("restr =  |%s|\n", restr);
+#endif
+						// check number of fun
+						int aflag = 1;
+						int kflag = ol[findex].number;
+						while(aflag > 0 && ei < strsize)
+						{
+							ei++;
+							if(strbk[ei] == '(') aflag++;
+							else if(strbk[ei] == ')') aflag--;
+							else if(strbk[ei] == ',') strbk[ei] = MATH_DELIMCHAR, kflag--;
+						}
+
+						if(kflag != 1 || aflag > 0)
+						{
+							// error
+							eflag = 1;
+							fprintf(stderr, "kflag = %d, aflag = %d\n", kflag, aflag);
+							break;
+						}
+
+						continue;
+					}
+				}
+
+				while(isalnum(strbk[ei]) || strbk[ei] == '.' || strbk[ei] == '_') ei++;
+				if(strbk[ei] == '(')
+				{
+					// TEST(xxx)
+					int aflag = 1;
+					while(aflag > 0 && ei < strsize)
+					{
+						if(strbk[ei] == '(') aflag++;
+						else if(strbk[ei] == ')') aflag--;
+						ei++;
+					}
+
+					if(aflag > 0)
+					{
+						// error
+						break;
+					}
+
+				}
+				else if(strbk[ei] == '[')
+				{
+					// TEST[a,b]
+					while(ei < strsize && strbk[ei] != ']') ei++;
+					if(ei >= strsize)
+					{
+						// error
+						break;
+					}
+					ei++;
+				}
+
+				while(i < ei)restr[rl++] = strbk[i];
+#ifdef __MF_DEBUG_MODE_
+				printf("restr =  |%s|\n", restr);
+#endif
+
+				flag = 1;
+			}
+			else
+			{
+				// number
+				char *p = NULL;
+				double value = strtof(strbk + i, &p);
+				if( p - strbk - i > 0)
+				{
+					while(strbk + i < p)restr[rl++] = strbk[i++];
+					i--;
+					flag = 1;
+#ifdef __MF_DEBUG_MODE_
+					printf("restr =  |%s|\n", restr);
+#endif
+				}
+				else
+				{
+					// error
+					eflag = 1;
+					break;
+				}
+			}
+		}
+		else if(flag == 1)
+		{
+			flag = (strbk[i+1] == '(' || strbk[i+1] == ')') ? 1 : 0;
+			switch(strbk[i])
+			{
+				case '+':
+				case '-':
+				case '*':
+				case '/':
+						 restr[rl++] = MATH_DELIMCHAR;
+						 restr[rl++] = strbk[i]; 
+						 restr[rl++] = MATH_DELIMCHAR;
+						 break;
+				case ')':pflag--;
+						 if(pflag < 0)
+						 {
+							 eflag = 1;
+							 break;
+						 }
+						 restr[rl++] = MATH_DELIMCHAR;
+						 restr[rl++] = strbk[i]; 
+						 restr[rl++] = MATH_DELIMCHAR;
+						 break;
+
+				case '(':pflag++;
+						 restr[rl++] = MATH_DELIMCHAR;
+						 restr[rl++] = strbk[i]; 
+						 restr[rl++] = MATH_DELIMCHAR;
+						 break;
+				case '>':
+				case '<':
+						 restr[rl++] = MATH_DELIMCHAR;
+						 restr[rl++] = strbk[i]; 
+						 if(strbk[i+1] == '=') restr[rl++] = '=';
+						 i++;
+						 restr[rl++] = MATH_DELIMCHAR;
+						 break;
+				case '=':
+						 if(strbk[i+1] != '=')
+						 {
+							 eflag = 1;
+							 break;
+						 }
+						 restr[rl++] = MATH_DELIMCHAR;
+						 restr[rl++] = strbk[i++]; 
+						 restr[rl++] = strbk[i]; 
+						 restr[rl++] = MATH_DELIMCHAR;
+						 break;
+
+				case MATH_DELIMCHAR:
+						 restr[rl++] = MATH_DELIMCHAR;
+						 restr[rl++] = ','; 
+						 restr[rl++] = MATH_DELIMCHAR;
+						 break;
+				case ',':
+				default:eflag = 1;break;
+			}
+
+			if(eflag == 1)
+			{
+				break;
+			}
+#ifdef __MF_DEBUG_MODE_
+			printf("restr =  |%s|\n", restr);
+#endif
+		}
+		else
+		{
+			// bug
+			fprintf(stderr, "[analysis]flag = %d", flag);
+			break;
+		}
+
+	}
+
+	if(pflag > 0)
+	{
+		fprintf(stderr, "[analysis]parser error:( not paired\n");
+	}
+
+	if(eflag == 1)
+	{
+		fprintf(stderr, "[analysis]parser failed in |%s|\n", strbk + i);
+		free(restr);
+		restr = NULL;
+	}
+
+	free(strbk);
+	return restr;
+}
+
+char *analysis_v1_0_0(char *str, int strsize)
 {
 	char *restr = malloc(strsize * 3);
 	//strcpy(restr, str);
@@ -1066,6 +1296,7 @@ int mathformula(char *str, double *result)
 #ifdef __MF_DEBUG_MODE_
 	_WriteLog("debug:p = |%s|\n", p);
 #endif
+	if(p == NULL) return -1;
 	int rc = mfTransformation(p, strlen(p), result);
 	free(p);
 
