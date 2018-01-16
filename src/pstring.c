@@ -32,6 +32,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <math.h>
+#include <float.h>
+#include <limits.h>
+
 #include "pstring.h"
 
 /* --------------------------------------------------------------------------*/
@@ -505,7 +509,7 @@ char *parseParenthesis(char *string)
 		if(string[i] == ')')
 		{
 			eflag--;
-			if(eflag < 0)
+			if(eflag <= 0)
 			{
 				eindex = i;
 				break;
@@ -516,12 +520,12 @@ char *parseParenthesis(char *string)
 			eflag++;
 			if(sindex < 0)
 			{
-				sindex = i;
+				sindex = i + 1;
 			}
 		}
 	}
 
-	if(eindex >= 0 && sindex >= 0 && eflag < 0)
+	if(eindex >= 0 && sindex >= 0 && eflag == 0)
 	{
 		return strncpy_p(string + sindex, eindex - sindex);
 	}
@@ -823,6 +827,40 @@ int utf8_strlen(const char * s)
 
 /* ----------------------------------------------------------------------------*/
 /**
+ * @brief 计算字符串被空格分割的子串数量
+ * @note  \t\n等符号也算作子串  只有空格的情况返回0
+ *
+ * @param s
+ *
+ * @return 
+ */
+/* ----------------------------------------------------------------------------*/
+int stringNumber(const char *s)
+{
+	int num = 0, len = strlen(s);
+	int i = 0;
+	while(i < len && s[i] == ' ')i++;
+	if(i == len) 
+		return 0;
+
+	for( ; i < len; i++)
+	{
+		if(s[i] == ' ')
+		{
+			while(s[i+1] == ' ')i++;
+		}
+		else
+		{
+			num++;
+			while(s[i+1] != ' ') i++;
+		}
+	}
+
+	return num;
+}
+
+/* ----------------------------------------------------------------------------*/
+/**
  * @brief 将数字转换成字符串
  *
  * @param num
@@ -839,28 +877,44 @@ char * inttostring(int num)
 
 char *doubletostring(double num)
 {
-	static char numstr[32];
-	snprintf(numstr, sizeof(numstr), "%lf", num);
+	static char numstr[64];
+	double dnum = floor(num);
+	if(fabs(num - dnum) <= DBL_EPSILON && num <= INT_MAX && num >= INT_MIN)
+	{
+		snprintf(numstr, sizeof(numstr), "%d", (int)dnum);
+	}
+	else
+	{
+		if(fabs(num - dnum) <= DBL_EPSILON && fabs(num) < 1.0e60)
+		{
+			snprintf(numstr, sizeof(numstr), "%.0f", num);
+		}
+		else if(fabs(num) < 1.0e-6 || fabs(num) > 1.0e9)
+		{
+			snprintf(numstr, sizeof(numstr), "%e", num);
+		}
+		else
+		{
+			snprintf(numstr, sizeof(numstr), "%f", num);
+		}
+	}
 	return numstr;
 }
 
-/**
- *
+//#define __TEST_PSTRING_
+#ifdef __TEST_PSTRING_
+
 int main()
 {
 	//test
-	char *test1 = "test";
-	int size = 0;
 
-	char *test2 = strcpy_p(test1);
-
-	char test[256];
-	while(~scanf("%s", test))
+	double a = 0;
+	while(~scanf("%lf", &a))
 	{
-		strcat_py(&test2, &size, 2, "%s", test);
-		printf("#%s#\n", test2);
+		printf("a=%f,|%s|\n", a, doubletostring(a));
 	}
 
 	return 0;
 }
-*/
+
+#endif

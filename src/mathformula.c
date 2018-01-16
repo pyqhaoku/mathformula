@@ -18,7 +18,7 @@
 #define strdup(a) strcpy_p(a)
 #endif
 
-#define __MF_DEBUG_MODE_
+//#define __MF_DEBUG_MODE_
 
 #define DEBUGARGS __FILE__,__LINE__,__FUNCTION__
 #define DEBUGFMT  "[mathformula]%s(%d)-%s:"
@@ -661,6 +661,7 @@ int mfCalcStack(operatorchar *pchar, formuladata *fdata, int level)
 
 		if(level == 0 && ol[oindex].level == 0)
 		{
+			operatorcharPop(pchar, oindex);
 			break;
 		}
 
@@ -743,10 +744,24 @@ int mfTransformation(char str[], int strsize, double *result)
 				rc = mfCalcStack(&pchar, &fdata, 0);
 				if(rc < 0)
 				{
+					free(s);
 					fprintf(stderr, "mfCalcStack() failed\n");
 					goto EXIT_ERR;
 				}
 
+				// skip (
+				operatorcharPush(&pchar);
+
+			}
+			else if(strcmp(s, ",") == 0)
+			{
+				rc = mfCalcStack(&pchar, &fdata, 0);
+				if(rc < 0)
+				{
+					free(s);
+					fprintf(stderr, "mfCalcStack() failed\n");
+					goto EXIT_ERR;
+				}
 			}
 			else
 			{
@@ -783,6 +798,7 @@ int mfTransformation(char str[], int strsize, double *result)
 				rc = mfCalcStack(&pchar, &fdata, olevel);
 				if(rc < 0)
 				{
+					free(s);
 					fprintf(stderr, "mfCalcStack() failed\n");
 					goto EXIT_ERR;
 				}

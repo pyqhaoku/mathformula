@@ -17,8 +17,10 @@ char *strcpy_p(char *str);
 char *strncpy_p(char *str, int len);
 char *strtagcpy(char *str, char *tag, int *len);
 
+int stringNumber(const char *s);
 int utf8_strlen(const char * s);
 char * inttostring(int num);
+char *doubletostring(double num);
 
 int stringRemoveChar(char *str, char ch);
 int stringRemoveSpace(char *str);

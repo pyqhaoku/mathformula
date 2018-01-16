@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include <mathformula.h>
 
@@ -20,6 +21,19 @@ int testf(char *desc, double *re)
 	{
 		*re = 2.7;
 	}
+	else if(strncmp(desc, "CHECK(", 6) == 0)
+	{
+		char *s = strdup(desc + 6);
+		char *p = strstr(s, ")");
+		*p = 0;
+
+		double res = 0;
+		mathformula(s, &res);
+		fprintf(stderr, "testf:res=%lf\n", res);
+
+		if(res > 4) *re = 1;
+		else *re = -1;
+	}
 
 	return 0;
 }
@@ -39,16 +53,16 @@ int lessEqual(int num, double data[], double *result)
 
 int mfIf(int num , double data[], double *result)
 {
-	if(data[0] == 0)
+	if(data[2] == 0)
 	{
-		*result = 0;
+		*result = data[0];
 	}
 	else
 	{
-		*result = 1;
+		*result = data[1];
 	}
 
-	printf("mfIf:data[0] = %lf\n", data[0]);
+	printf("mfIf:data[2] = %lf\n", data[0]);
 	return 0;
 }
 
@@ -56,7 +70,7 @@ int main()
 {
 	//operatorListAdd(">=", LEVEL_TEN, 2, MATH_TYPE_A, greatEqual);
 	//operatorListAdd("<=", LEVEL_TEN, 2, MATH_TYPE_A, lessEqual);
-	int rc = operatorListAdd("IF", LEVEL_TEN, 1, MATH_TYPE_B, mfIf);
+	int rc = operatorListAdd("IF", LEVEL_TEN, 3, MATH_TYPE_B, mfIf);
 	//printf("rc = %d\n", rc);
 	mfDescToValue = testf;
 	char test[256];

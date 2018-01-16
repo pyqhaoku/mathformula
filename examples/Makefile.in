@@ -186,7 +186,7 @@ top_srcdir = @top_srcdir@
 INCLUDES = -I../include
 COMMON_LIB = 
 test_SOURCES = test.c
-test_LDADD = $(top_builddir)/src/libmathformula.la
+test_LDADD = $(top_builddir)/src/libmathformula.la -lm
 all: all-am
 
 .SUFFIXES:
