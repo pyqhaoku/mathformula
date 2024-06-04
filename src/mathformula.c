@@ -666,8 +666,7 @@ char *analysis(const char *str, int strsize)
 				case '<':
 						 restr[rl++] = MATH_DELIMCHAR;
 						 restr[rl++] = strbk[i]; 
-						 if(strbk[i+1] == '=') restr[rl++] = '=';
-						 i++;
+						 if(strbk[i+1] == '=') { restr[rl++] = '='; i++; }
 						 restr[rl++] = MATH_DELIMCHAR;
 						 break;
 				case '=':
